@@ -1,0 +1,1842 @@
+```html
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>NovaSpeak AI — Real-Time Spoken English Partner</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Google Fonts: Inter & Plus Jakarta Sans -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" rel="stylesheet">
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+            display: ['Plus Jakarta Sans', 'sans-serif'],
+          },
+          colors: {
+            nova: {
+              50: '#f0f4ff',
+              100: '#e0e9ff',
+              400: '#818cf8',
+              500: '#6366f1',
+              600: '#4f46e5',
+              900: '#1e1b4b',
+              950: '#090816'
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    body {
+      background-color: #070913;
+      color: #f8fafc;
+      overflow-x: hidden;
+    }
+
+    /* Custom Scrollbars */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: rgba(15, 23, 42, 0.4);
+    }
+    ::-webkit-scrollbar-thumb {
+      background: rgba(99, 102, 241, 0.35);
+      border-radius: 9999px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: rgba(99, 102, 241, 0.6);
+    }
+
+    /* Ambient Glows */
+    .orb-backdrop-idle {
+      background: radial-gradient(circle, rgba(99, 102, 241, 0.22) 0%, rgba(139, 92, 246, 0.08) 45%, transparent 70%);
+    }
+    .orb-backdrop-listening {
+      background: radial-gradient(circle, rgba(16, 185, 129, 0.28) 0%, rgba(6, 182, 212, 0.12) 45%, transparent 70%);
+    }
+    .orb-backdrop-thinking {
+      background: radial-gradient(circle, rgba(217, 70, 239, 0.28) 0%, rgba(139, 92, 246, 0.14) 45%, transparent 70%);
+    }
+    .orb-backdrop-speaking {
+      background: radial-gradient(circle, rgba(56, 189, 248, 0.32) 0%, rgba(99, 102, 241, 0.16) 50%, transparent 72%);
+    }
+
+    /* Glassmorphism panels */
+    .glass-panel {
+      background: rgba(15, 23, 42, 0.68);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(148, 163, 184, 0.12);
+    }
+
+    .glass-card {
+      background: rgba(30, 41, 59, 0.55);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(148, 163, 184, 0.12);
+    }
+
+    @keyframes pulseRing {
+      0% { transform: scale(0.95); opacity: 0.7; }
+      50% { transform: scale(1.08); opacity: 0.3; }
+      100% { transform: scale(0.95); opacity: 0.7; }
+    }
+
+    .animate-pulse-ring {
+      animation: pulseRing 2.4s infinite ease-in-out;
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col font-sans antialiased selection:bg-indigo-500 selection:text-white">
+
+  <!-- TOP NAVIGATION & LIVE ANALYTICS HEADER -->
+  <header class="sticky top-0 z-30 glass-panel border-b border-slate-800/80 px-3 sm:px-6 py-2.5">
+    <div class="max-w-[1600px] mx-auto flex flex-wrap items-center justify-between gap-3">
+      
+      <!-- Brand Logo & Status -->
+      <div class="flex items-center gap-3">
+        <div class="relative flex items-center justify-center w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-600 via-violet-500 to-cyan-400 shadow-lg shadow-indigo-500/25">
+          <i class="fa-solid fa-waveform-lines text-white text-lg"></i>
+          <span id="headerStatusDot" class="absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full bg-emerald-400 ring-2 ring-slate-950"></span>
+        </div>
+        <div>
+          <div class="flex items-center gap-2">
+            <h1 class="font-display font-bold text-lg sm:text-xl tracking-tight bg-gradient-to-r from-white via-indigo-200 to-cyan-300 bg-clip-text text-transparent">
+              NovaSpeak AI
+            </h1>
+            <span class="text-[10px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">
+              Live Coach
+            </span>
+          </div>
+          <p class="text-xs text-slate-400 hidden sm:block">24/7 Personal Spoken English & Fluency Partner</p>
+        </div>
+      </div>
+
+      <!-- Live Session Fluency Metrics Bar -->
+      <div class="flex items-center gap-2 sm:gap-4 bg-slate-900/90 border border-slate-800/90 rounded-2xl px-3 py-1.5 text-xs">
+        <div class="flex items-center gap-1.5 pr-2 sm:pr-3 border-r border-slate-800" title="Session Call Duration">
+          <i class="fa-regular fa-clock text-indigo-400"></i>
+          <span id="statTimer" class="font-mono font-semibold text-slate-200">00:00</span>
+        </div>
+        <div class="flex items-center gap-1.5 pr-2 sm:pr-3 border-r border-slate-800" title="Speaking Turns Completed">
+          <i class="fa-solid fa-comments text-cyan-400"></i>
+          <span class="text-slate-400 hidden md:inline">Turns:</span>
+          <span id="statTurns" class="font-semibold text-white">0</span>
+        </div>
+        <div class="flex items-center gap-1.5 pr-2 sm:pr-3 border-r border-slate-800" title="Average Fluency & Naturalness Score">
+          <i class="fa-solid fa-bolt text-amber-400"></i>
+          <span class="text-slate-400 hidden md:inline">Fluency:</span>
+          <span id="statFluency" class="font-semibold text-emerald-400">--%</span>
+        </div>
+        <div class="flex items-center gap-1.5" title="Filler Words Detected (um, uh, like, basically, actually)">
+          <i class="fa-solid fa-filter-circle-xmark text-rose-400"></i>
+          <span class="text-slate-400 hidden md:inline">Fillers:</span>
+          <span id="statFillers" class="font-semibold text-rose-300">0</span>
+        </div>
+      </div>
+
+      <!-- Right Action Buttons -->
+      <div class="flex items-center gap-2">
+        <button id="btnOpenSettings" class="p-2.5 rounded-xl bg-slate-800/80 hover:bg-slate-700/80 text-slate-300 hover:text-white border border-slate-700/60 transition flex items-center gap-1.5 text-xs font-medium" title="Voice & Audio Settings">
+          <i class="fa-solid fa-sliders text-indigo-400"></i>
+          <span class="hidden lg:inline">Voice Settings</span>
+        </button>
+
+        <button id="btnOpenReport" class="px-3.5 py-2 rounded-xl bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white font-semibold text-xs shadow-lg shadow-indigo-600/25 transition flex items-center gap-1.5">
+          <i class="fa-solid fa-chart-pie"></i>
+          <span>Report Card</span>
+        </button>
+      </div>
+
+    </div>
+  </header>
+
+  <!-- MAIN WORKSPACE GRID -->
+  <main class="flex-1 max-w-[1600px] w-full mx-auto grid grid-cols-1 lg:grid-cols-12 gap-4 p-3 sm:p-5 overflow-hidden">
+
+    <!-- LEFT COLUMN: SCENARIO SELECTOR, LIVE VOICE ORB, & CALL CONTROLS (7 Cols on Desktop) -->
+    <section class="lg:col-span-7 flex flex-col justify-between glass-panel rounded-3xl p-4 sm:p-6 relative overflow-hidden min-h-[580px]">
+      
+      <!-- Top Bar: Scenario Mode Selector & Continuous Call Switch -->
+      <div class="z-10 flex flex-col gap-3">
+        <div class="flex flex-wrap items-center justify-between gap-2">
+          <div class="flex items-center gap-2">
+            <span class="text-xs font-semibold uppercase tracking-wider text-slate-400">Practice Mode:</span>
+          </div>
+
+          <!-- Continuous Hands-Free Call Toggle -->
+          <label class="flex items-center gap-2.5 cursor-pointer bg-slate-900/90 border border-slate-700/80 px-3 py-1.5 rounded-full hover:border-indigo-500/60 transition">
+            <input type="checkbox" id="toggleHandsFree" class="sr-only peer" checked>
+            <div class="w-8 h-4 bg-slate-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-3 after:w-3 after:transition-all relative peer-checked:bg-emerald-500"></div>
+            <span class="text-xs font-medium text-slate-200 flex items-center gap-1.5">
+              <i class="fa-solid fa-phone-volume text-emerald-400 text-[11px]"></i>
+              Continuous Call Mode
+            </span>
+          </label>
+        </div>
+
+        <!-- Mode Pills -->
+        <div id="modeButtonsContainer" class="flex items-center gap-2 overflow-x-auto pb-1 no-scrollbar">
+          <button data-mode="free_talk" class="mode-btn active shrink-0 px-3.5 py-2 rounded-xl text-xs font-semibold transition flex items-center gap-2 bg-indigo-600 text-white shadow-md shadow-indigo-600/30 border border-indigo-400/40">
+            <i class="fa-solid fa-mug-hot"></i> Free Talk
+          </button>
+          <button data-mode="job_interview" class="mode-btn shrink-0 px-3.5 py-2 rounded-xl text-xs font-semibold transition flex items-center gap-2 bg-slate-800/80 hover:bg-slate-800 text-slate-300 border border-slate-700/70">
+            <i class="fa-solid fa-briefcase"></i> Job Interview
+          </button>
+          <button data-mode="situational" class="mode-btn shrink-0 px-3.5 py-2 rounded-xl text-xs font-semibold transition flex items-center gap-2 bg-slate-800/80 hover:bg-slate-800 text-slate-300 border border-slate-700/70">
+            <i class="fa-solid fa-plane-departure"></i> Everyday Roleplay
+          </button>
+          <button data-mode="debate" class="mode-btn shrink-0 px-3.5 py-2 rounded-xl text-xs font-semibold transition flex items-center gap-2 bg-slate-800/80 hover:bg-slate-800 text-slate-300 border border-slate-700/70">
+            <i class="fa-solid fa-scale-balanced"></i> Debate & Opinion
+          </button>
+          <button data-mode="custom" class="mode-btn shrink-0 px-3.5 py-2 rounded-xl text-xs font-semibold transition flex items-center gap-2 bg-slate-800/80 hover:bg-slate-800 text-slate-300 border border-slate-700/70">
+            <i class="fa-solid fa-wand-magic-sparkles"></i> Custom Topic
+          </button>
+        </div>
+
+        <!-- Custom Topic Input Bar (Hidden unless Custom Topic selected) -->
+        <div id="customTopicWrapper" class="hidden flex items-center gap-2 bg-slate-900/90 p-2 rounded-xl border border-indigo-500/40">
+          <input id="customTopicInput" type="text" placeholder="E.g., Pitching my startup idea, talking about Marvel movies, ordering at a restaurant..." class="flex-1 bg-transparent text-xs text-white placeholder-slate-400 focus:outline-none px-2" />
+          <button id="btnApplyCustomTopic" class="px-3 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-xs font-semibold text-white transition">
+            Start Topic
+          </button>
+        </div>
+      </div>
+
+      <!-- CENTER: NOVA ANIMATED VOICE ORB & LIVE SUBTITLES -->
+      <div class="relative flex-1 flex flex-col items-center justify-center my-2 py-4 select-none">
+        
+        <!-- Dynamic Radial Glow Backdrop -->
+        <div id="orbBackdrop" class="orb-backdrop-idle absolute w-72 h-72 sm:w-96 sm:h-96 rounded-full transition-all duration-700 pointer-events-none"></div>
+
+        <!-- State Badge Above Orb -->
+        <div class="z-10 mb-3 flex items-center gap-2 px-3.5 py-1 rounded-full bg-slate-900/90 border border-slate-700/80 shadow-inner">
+          <span id="orbStateDot" class="w-2 h-2 rounded-full bg-indigo-400 animate-ping"></span>
+          <span id="orbStateLabel" class="text-xs font-semibold tracking-wide text-indigo-200 uppercase">Nova • Ready to Talk</span>
+        </div>
+
+        <!-- Interactive 60FPS HTML5 Canvas Orb -->
+        <div class="relative flex items-center justify-center w-52 h-52 sm:w-64 sm:h-64 cursor-pointer group" id="orbClickArea" title="Click to talk or interrupt Nova">
+          <canvas id="novaOrbCanvas" class="w-full h-full z-10"></canvas>
+          <div class="absolute inset-4 rounded-full border border-indigo-500/20 group-hover:border-indigo-400/50 transition-all duration-300 pointer-events-none animate-pulse-ring"></div>
+        </div>
+
+        <!-- Nova's Current Spoken Subtitle Display -->
+        <div class="z-10 max-w-xl w-full text-center mt-3 px-3">
+          <p id="novaLiveSubtitle" class="text-sm sm:text-base font-medium text-slate-100 leading-relaxed bg-slate-900/75 border border-slate-800/90 rounded-2xl px-4 py-3 shadow-lg backdrop-blur-md">
+            "Hey there! I'm Nova, your personal English speaking partner. Tap the microphone below and tell me—how is your day going so far?"
+          </p>
+        </div>
+
+        <!-- Live User Speech Interim Transcript Preview -->
+        <div id="interimTranscriptBox" class="z-10 mt-2.5 min-h-[28px] flex items-center justify-center">
+          <span id="interimTranscriptText" class="text-xs sm:text-sm italic text-emerald-300 bg-emerald-950/60 border border-emerald-500/30 px-3 py-1 rounded-full hidden">
+            Listening...
+          </span>
+        </div>
+
+        <!-- Collapsible Hint Box (When user clicks "Need a Hint") -->
+        <div id="hintBanner" class="hidden z-10 mt-2 max-w-lg w-full bg-amber-500/10 border border-amber-500/30 rounded-xl px-3.5 py-2 text-xs text-amber-200 flex items-start justify-between gap-2">
+          <div>
+            <span class="font-bold text-amber-400"><i class="fa-regular fa-lightbulb mr-1"></i>Try saying:</span>
+            <span id="hintText" class="italic">"My day has been pretty productive so far! I spent the morning working on a project, and now I'm excited to practice my English with you."</span>
+          </div>
+          <button id="btnCloseHint" class="text-amber-300 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+
+      </div>
+
+      <!-- BOTTOM: CALL CONTROLS & TEXT FALLBACK BAR -->
+      <div class="z-10 flex flex-col gap-3 pt-2 border-t border-slate-800/80">
+        
+        <!-- Primary Voice Controls Row -->
+        <div class="flex items-center justify-center gap-3 sm:gap-5">
+          
+          <!-- Need a Hint Button -->
+          <button id="btnShowHint" class="px-3.5 py-2.5 rounded-2xl bg-slate-800/90 hover:bg-slate-700/90 text-amber-300 border border-slate-700/80 text-xs font-semibold transition flex items-center gap-1.5 shadow" title="Stuck? Get a starter sentence idea">
+            <i class="fa-regular fa-lightbulb"></i>
+            <span class="hidden sm:inline">Idea / Hint</span>
+          </button>
+
+          <!-- Main Microphone Button (Tap to Speak / Stop & Send) -->
+          <button id="btnMicToggle" class="relative group flex items-center justify-center gap-2.5 px-7 py-4 rounded-full font-display font-bold text-sm sm:text-base text-white bg-gradient-to-r from-indigo-600 via-violet-600 to-indigo-600 hover:from-indigo-500 hover:to-violet-500 shadow-xl shadow-indigo-600/30 transition-all transform active:scale-95">
+            <i id="micBtnIcon" class="fa-solid fa-microphone text-lg"></i>
+            <span id="micBtnLabel">Tap to Speak</span>
+          </button>
+
+          <!-- Interrupt / Replay Nova Button -->
+          <button id="btnInterruptOrReplay" class="px-3.5 py-2.5 rounded-2xl bg-slate-800/90 hover:bg-slate-700/90 text-cyan-300 border border-slate-700/80 text-xs font-semibold transition flex items-center gap-1.5 shadow" title="Replay Nova's last response or interrupt her">
+            <i id="interruptIcon" class="fa-solid fa-rotate-left"></i>
+            <span id="interruptLabel" class="hidden sm:inline">Replay Voice</span>
+          </button>
+
+        </div>
+
+        <!-- Text Input Fallback & Quick Send (Works on all browsers or quiet environments) -->
+        <form id="textFallbackForm" class="flex items-center gap-2 bg-slate-900/90 border border-slate-800 focus-within:border-indigo-500/70 rounded-2xl px-3 py-1.5 transition">
+          <i class="fa-regular fa-keyboard text-slate-400 text-sm pl-1"></i>
+          <input
+            id="textFallbackInput"
+            type="text"
+             autocomplete="off"
+            placeholder="Or type your response here (press Enter to send)..."
+            class="flex-1 bg-transparent text-xs sm:text-sm text-white placeholder-slate-400 focus:outline-none py-1.5"
+          />
+          <button type="submit" id="btnSendText" class="px-3.5 py-1.5 rounded-xl bg-indigo-600/90 hover:bg-indigo-500 text-white text-xs font-semibold transition flex items-center gap-1.5">
+            <span>Send</span>
+            <i class="fa-solid fa-paper-plane text-[11px]"></i>
+          </button>
+        </form>
+
+      </div>
+
+    </section>
+
+    <!-- RIGHT COLUMN: REAL-TIME COACHING SIDEBAR, LIVE TRANSCRIPT & SAVED DECK (5 Cols on Desktop) -->
+    <aside class="lg:col-span-5 flex flex-col glass-panel rounded-3xl overflow-hidden h-[620px] lg:h-[calc(100vh-92px)]">
+      
+      <!-- Sidebar Navigation Tabs -->
+      <div class="flex items-center justify-between border-b border-slate-800/90 bg-slate-900/60 px-3 pt-2.5">
+        <div class="flex items-center gap-1">
+          <button data-tab="transcript" class="sidebar-tab active px-3.5 py-2 text-xs font-semibold rounded-t-xl border-b-2 border-indigo-500 text-white bg-slate-800/60 flex items-center gap-1.5 transition">
+            <i class="fa-solid fa-Wave-square text-indigo-400"></i>
+            <span>Live Call & Coach</span>
+          </button>
+          <button data-tab="corrections" class="sidebar-tab px-3.5 py-2 text-xs font-semibold rounded-t-xl border-b-2 border-transparent text-slate-400 hover:text-slate-200 flex items-center gap-1.5 transition">
+            <i class="fa-solid fa-wand-magic-sparkles text-emerald-400"></i>
+            <span>Corrections</span>
+            <span id="badgeCorrectionsCount" class="px-1.5 py-0.2 rounded-full text-[10px] bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">0</span>
+          </button>
+          <button data-tab="saved" class="sidebar-tab px-3.5 py-2 text-xs font-semibold rounded-t-xl border-b-2 border-transparent text-slate-400 hover:text-slate-200 flex items-center gap-1.5 transition">
+            <i class="fa-solid fa-bookmark text-amber-400"></i>
+            <span>Saved Deck</span>
+            <span id="badgeSavedCount" class="px-1.5 py-0.2 rounded-full text-[10px] bg-amber-500/20 text-amber-300 border border-amber-500/30">0</span>
+          </button>
+        </div>
+
+        <button id="btnClearSession" class="text-[11px] text-slate-400 hover:text-rose-400 px-2 py-1 rounded transition" title="Reset current conversation">
+          <i class="fa-solid fa-rotate-right mr-1"></i>Reset
+        </button>
+      </div>
+
+      <!-- TAB 1: LIVE TRANSCRIPT & INLINE GRAMMAR COACH CARDS -->
+      <div id="tabPanelTranscript" class="flex-1 overflow-y-auto p-3 sm:p-4 space-y-4">
+        <!-- Dynamic conversation messages & inline coaching cards are rendered here -->
+      </div>
+
+      <!-- TAB 2: DEDICATED GRAMMAR & VOCABULARY CORRECTIONS FEED -->
+      <div id="tabPanelCorrections" class="hidden flex-1 overflow-y-auto p-3 sm:p-4 space-y-3">
+        <div id="correctionsEmptyState" class="h-full flex flex-col items-center justify-center text-center p-6 text-slate-400">
+          <div class="w-12 h-12 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400 mb-3">
+            <i class="fa-solid fa-check-double text-xl"></i>
+          </div>
+          <p class="text-sm font-semibold text-slate-200">No Grammar Corrections Yet</p>
+          <p class="text-xs text-slate-400 mt-1 max-w-xs">
+            Start speaking with Nova! Every time she spots a way to make your English sound more natural or native, a detailed coaching card will appear here.
+          </p>
+        </div>
+        <div id="correctionsListContainer" class="space-y-3"></div>
+      </div>
+
+      <!-- TAB 3: SAVED PHRASES & VOCABULARY FLASHCARD DECK -->
+      <div id="tabPanelSaved" class="hidden flex-1 overflow-y-auto p-3 sm:p-4 space-y-3">
+        <div id="savedEmptyState" class="h-full flex flex-col items-center justify-center text-center p-6 text-slate-400">
+          <div class="w-12 h-12 rounded-2xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-400 mb-3">
+            <i class="fa-regular fa-bookmark text-xl"></i>
+          </div>
+          <p class="text-sm font-semibold text-slate-200">Your Phrase Deck is Empty</p>
+          <p class="text-xs text-slate-400 mt-1 max-w-xs">
+            Bookmark any improved sentence or vocabulary upgrade during your conversation to build your personal revision deck.
+          </p>
+        </div>
+        <div id="savedListContainer" class="space-y-3"></div>
+      </div>
+
+    </aside>
+
+  </main>
+
+  <!-- VOICE & AUDIO SETTINGS MODAL -->
+  <div id="modalSettings" class="fixed inset-0 z-50 hidden bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="glass-panel rounded-3xl max-w-md w-full p-6 border border-slate-700/80 shadow-2xl space-y-5">
+      <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+        <div class="flex items-center gap-2.5">
+          <div class="w-8 h-8 rounded-xl bg-indigo-500/20 border border-indigo-500/40 flex items-center justify-center text-indigo-400">
+            <i class="fa-solid fa-sliders"></i>
+          </div>
+          <h2 class="font-display font-bold text-lg text-white">Nova Voice & Call Settings</h2>
+        </div>
+        <button id="btnCloseSettings" class="text-slate-400 hover:text-white p-1">
+          <i class="fa-solid fa-xmark text-lg"></i>
+        </button>
+      </div>
+
+      <div class="space-y-4 text-xs sm:text-sm">
+        <!-- Voice Engine Selection -->
+        <div>
+          <label class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1.5">Voice Synthesis Engine</label>
+          <select id="selectTtsEngine" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2.5 text-white focus:outline-none focus:border-indigo-500">
+            <option value="browser">Instant Browser Neural Voice (Zero Latency)</option>
+            <option value="gemini">Gemini 2.5 Native Neural Voice (Aoede HD)</option>
+          </select>
+        </div>
+
+        <!-- Browser Voice Selection -->
+        <div id="browserVoicePickerRow">
+          <label class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1.5">Browser English Voice</label>
+          <select id="selectVoiceList" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2.5 text-white focus:outline-none focus:border-indigo-500">
+            <option value="">Loading available voices...</option>
+          </select>
+        </div>
+
+        <!-- Speaking Speed -->
+        <div>
+          <div class="flex justify-between text-xs mb-1">
+            <span class="font-semibold uppercase tracking-wider text-slate-400">Speaking Speed</span>
+            <span id="speedValueLabel" class="font-mono font-bold text-indigo-400">1.0x (Natural)</span>
+          </div>
+          <input id="rangeSpeechRate" type="range" min="0.75" max="1.25" step="0.05" value="1.0" class="w-full accent-indigo-500 cursor-pointer" />
+          <div class="flex justify-between text-[11px] text-slate-500 mt-0.5">
+            <span>0.75x (Slower)</span>
+            <span>1.0x (Normal)</span>
+            <span>1.25x (Faster)</span>
+          </div>
+        </div>
+
+        <!-- Auto-Speak Toggle -->
+        <div class="flex items-center justify-between pt-2 border-t border-slate-800">
+          <div>
+            <p class="font-semibold text-slate-200">Auto-Speak Nova's Replies</p>
+            <p class="text-xs text-slate-400">Automatically read Nova's response out loud</p>
+          </div>
+          <input id="checkAutoSpeak" type="checkbox" checked class="w-5 h-5 accent-indigo-500 rounded cursor-pointer" />
+        </div>
+      </div>
+
+      <div class="flex justify-end gap-2 pt-2">
+        <button id="btnTestVoice" class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold transition">
+          <i class="fa-solid fa-volume-high mr-1.5 text-indigo-400"></i>Test Voice
+        </button>
+        <button id="btnSaveSettings" class="px-5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold transition">
+          Done
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- SESSION REPORT CARD MODAL -->
+  <div id="modalReportCard" class="fixed inset-0 z-50 hidden bg-slate-950/85 backdrop-blur-md flex items-center justify-center p-4 overflow-y-auto">
+    <div class="glass-panel rounded-3xl max-w-2xl w-full p-5 sm:p-7 border border-slate-700/80 shadow-2xl my-8 space-y-5 max-h-[90vh] overflow-y-auto">
+      
+      <!-- Modal Header -->
+      <div class="flex items-center justify-between border-b border-slate-800 pb-4">
+        <div class="flex items-center gap-3">
+          <div class="w-11 h-11 rounded-2xl bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center text-white shadow-lg shadow-indigo-500/30">
+            <i class="fa-solid fa-award text-xl"></i>
+          </div>
+          <div>
+            <h2 class="font-display font-bold text-lg sm:text-xl text-white">Spoken English Session Report Card</h2>
+            <p id="reportSubtitle" class="text-xs text-slate-400">Live Fluency & Communication Breakdown</p>
+          </div>
+        </div>
+        <button id="btnCloseReport" class="text-slate-400 hover:text-white p-1.5">
+          <i class="fa-solid fa-xmark text-lg"></i>
+        </button>
+      </div>
+
+      <!-- Top Summary Stat Grid -->
+      <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+        <div class="glass-card rounded-2xl p-3.5 text-center">
+          <span class="text-[11px] uppercase tracking-wider text-slate-400 block">Overall Fluency</span>
+          <span id="reportAvgFluency" class="font-display font-extrabold text-2xl sm:text-3xl text-emerald-400 mt-1 block">--%</span>
+        </div>
+        <div class="glass-card rounded-2xl p-3.5 text-center">
+          <span class="text-[11px] uppercase tracking-wider text-slate-400 block">Words Spoken</span>
+          <span id="reportWordsCount" class="font-display font-extrabold text-2xl sm:text-3xl text-indigo-300 mt-1 block">0</span>
+        </div>
+        <div class="glass-card rounded-2xl p-3.5 text-center">
+          <span class="text-[11px] uppercase tracking-wider text-slate-400 block">Speaking Turns</span>
+          <span id="reportTurnsCount" class="font-display font-extrabold text-2xl sm:text-3xl text-cyan-300 mt-1 block">0</span>
+        </div>
+        <div class="glass-card rounded-2xl p-3.5 text-center">
+          <span class="text-[11px] uppercase tracking-wider text-slate-400 block">Filler Words</span>
+          <span id="reportFillersCount" class="font-display font-extrabold text-2xl sm:text-3xl text-rose-400 mt-1 block">0</span>
+        </div>
+      </div>
+
+      <!-- Filler Words Breakdown -->
+      <div class="glass-card rounded-2xl p-4 space-y-2">
+        <h3 class="text-xs font-bold uppercase tracking-wider text-slate-300 flex items-center gap-2">
+          <i class="fa-solid fa-microphone-lines text-indigo-400"></i>
+          Communication Clarity & Filler Habit Check
+        </h3>
+        <p id="reportFillerSummary" class="text-xs text-slate-300 leading-relaxed">
+          Complete at least one speaking turn to analyze your filler words and pacing.
+        </p>
+      </div>
+
+      <!-- Top Grammar & Phrasing Upgrades from This Session -->
+      <div class="space-y-2.5">
+        <h3 class="text-xs font-bold uppercase tracking-wider text-slate-300 flex items-center gap-2">
+          <i class="fa-solid fa-wand-magic-sparkles text-emerald-400"></i>
+          Key Phrasing Refinements From This Call
+        </h3>
+        <div id="reportCorrectionsList" class="space-y-2.5 max-h-60 overflow-y-auto pr-1">
+          <!-- Populated dynamically -->
+        </div>
+      </div>
+
+      <!-- Action Footer -->
+      <div class="flex flex-wrap items-center justify-between gap-3 pt-3 border-t border-slate-800">
+        <button id="btnCopyReport" class="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold transition flex items-center gap-2">
+          <i class="fa-regular fa-copy text-indigo-400"></i>
+          <span id="copyReportLabel">Copy Summary Report</span>
+        </button>
+        <button id="btnContinueCall" class="px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold transition">
+          Back to Live Call
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- TOAST NOTIFICATION -->
+  <div id="toastNotification" class="fixed bottom-5 right-5 z-50 hidden px-4 py-2.5 rounded-2xl bg-slate-900/95 border border-indigo-500/40 text-white text-xs font-medium shadow-2xl flex items-center gap-2">
+    <i class="fa-solid fa-circle-check text-emerald-400"></i>
+    <span id="toastText">Saved to your deck!</span>
+  </div>
+
+  <!-- APPLICATION SCRIPT -->
+  <script>
+    /********************************************************************
+     * 1. STATE & CONFIGURATION
+     ********************************************************************/
+    const apiKey = ""; // Canvas runtime injects API key automatically
+
+    const SCENARIO_MODES = {
+      free_talk: {
+        name: "Free Talk",
+        systemContext: "Casual, friendly phone call about everyday life, hobbies, movies, technology, or personal goals.",
+        starterGreeting: "Hey there! I'm Nova, your personal English speaking partner. Tap the microphone below and tell me—how is your day going so far?",
+        starterHint: "My day has been pretty good so far! I spent the morning catching up on my work, and now I'm excited to practice my English."
+      },
+      job_interview: {
+        name: "Job & HR Interview Coach",
+        systemContext: "Friendly but professional HR/Hiring Manager conducting a mock job interview. Ask realistic behavioral and career questions and help the user sound confident and articulate.",
+        starterGreeting: "Welcome! Let's practice for your upcoming job interview. To kick things off, could you tell me a little bit about yourself and what kind of role you're aiming for?",
+        starterHint: "Sure! I'm a software developer with a strong passion for building user-focused applications, and I'm currently looking for a full-stack role."
+      },
+      situational: {
+        name: "Everyday Situational Roleplay",
+        systemContext: "Everyday real-world English situations such as networking at a conference, ordering at a specialty cafe, workplace meetings, or international travel.",
+        starterGreeting: "Let's do a quick real-world roleplay! Imagine we just bumped into each other at an international tech & creator networking mixer. What brings you to the event today?",
+        starterHint: "Hi! It's great to meet you. I came here today to meet fellow builders and learn more about the latest trends in AI."
+      },
+      debate: {
+        name: "Debate & Opinion Express",
+        systemContext: "Intellectual yet friendly debate partner helping the user structure persuasive arguments, use transition words, and defend viewpoints clearly in English.",
+        starterGreeting: "Let's sharpen your persuasive English! Here's a fun topic: Do you think remote work is better than working from an office, or does in-person collaboration still win? What's your take?",
+        starterHint: "In my opinion, a hybrid model works best because remote work offers deep focus, while office days help build team culture."
+      },
+      custom: {
+        name: "Custom Topic",
+        systemContext: "Custom user-selected conversation topic.",
+        starterGreeting: "I'm ready! Type your custom topic or scenario above, or just start speaking about whatever is on your mind right now.",
+        starterHint: "I'd love to practice talking about my favorite book and why it inspired me."
+      }
+    };
+
+    const FILLER_WORDS_LIST = ["um", "uh", "er", "ah", "like", "basically", "actually", "literally", "you know", "sort of", "kind of"];
+
+    const state = {
+      orbState: "idle", // 'idle' | 'listening' | 'thinking' | 'speaking'
+      currentMode: "free_talk",
+      customTopicText: "",
+      handsFreeMode: true,
+      autoSpeak: true,
+      ttsEngine: "browser", // 'browser' | 'gemini'
+      speechRate: 1.0,
+      selectedVoiceURI: "",
+      isRecording: false,
+      isProcessingLLM: false,
+      isSpeaking: false,
+      lastNovaReply: SCENARIO_MODES.free_talk.starterGreeting,
+      currentHint: SCENARIO_MODES.free_talk.starterHint,
+
+      // Session Stats
+      sessionStartTime: Date.now(),
+      turnsCount: 0,
+      fluencyScores: [],
+      totalWordsSpoken: 0,
+      totalFillersCount: 0,
+      fillerBreakdown: {},
+
+      // Conversation & Coaching Data
+      messages: [], // { id, sender: 'nova'|'user', text, timestamp, coaching?: {...} }
+      corrections: [],
+      savedDeck: [],
+      geminiChatHistory: []
+    };
+
+    // Load saved deck from localStorage
+    try {
+      const savedRaw = localStorage.getItem("novaspeak_saved_deck_v1");
+      if (savedRaw) state.savedDeck = JSON.parse(savedRaw);
+    } catch (e) {
+      console.warn("Could not load saved phrases from storage:", e);
+    }
+
+    /********************************************************************
+     * 2. INTERACTIVE 60FPS VOICE ORB CANVAS VISUALIZER
+     ********************************************************************/
+    const orbCanvas = document.getElementById("novaOrbCanvas");
+    const orbCtx = orbCanvas.getContext("2d");
+    let orbPhase = 0;
+
+    function resizeOrbCanvas() {
+      const rect = orbCanvas.parentElement.getBoundingClientRect();
+      const dpr = window.devicePixelRatio || 1;
+      orbCanvas.width = rect.width * dpr;
+      orbCanvas.height = rect.height * dpr;
+      orbCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    }
+    window.addEventListener("resize", resizeOrbCanvas);
+
+    function setOrbVisualState(newState) {
+      state.orbState = newState;
+      const backdrop = document.getElementById("orbBackdrop");
+      const dot = document.getElementById("orbStateDot");
+      const label = document.getElementById("orbStateLabel");
+      const micBtn = document.getElementById("btnMicToggle");
+      const micIcon = document.getElementById("micBtnIcon");
+      const micLabel = document.getElementById("micBtnLabel");
+      const interruptIcon = document.getElementById("interruptIcon");
+      const interruptLabel = document.getElementById("interruptLabel");
+
+      backdrop.className = "absolute w-72 h-72 sm:w-96 sm:h-96 rounded-full transition-all duration-700 pointer-events-none ";
+
+      if (newState === "listening") {
+        backdrop.classList.add("orb-backdrop-listening");
+        dot.className = "w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping";
+        label.textContent = "Listening to you... Speak naturally";
+        label.className = "text-xs font-semibold tracking-wide text-emerald-300 uppercase";
+
+        micBtn.className = "relative group flex items-center justify-center gap-2.5 px-7 py-4 rounded-full font-display font-bold text-sm sm:text-base text-white bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 shadow-xl shadow-emerald-500/30 transition-all transform active:scale-95 ring-4 ring-emerald-500/20";
+        micIcon.className = "fa-solid fa-stop text-lg animate-pulse";
+        micLabel.textContent = "Done Speaking";
+      } else if (newState === "thinking") {
+        backdrop.classList.add("orb-backdrop-thinking");
+        dot.className = "w-2.5 h-2.5 rounded-full bg-fuchsia-400 animate-ping";
+        label.textContent = "Nova is crafting a response...";
+        label.className = "text-xs font-semibold tracking-wide text-fuchsia-300 uppercase";
+
+        micBtn.className = "relative group flex items-center justify-center gap-2.5 px-7 py-4 rounded-full font-display font-bold text-sm sm:text-base text-slate-300 bg-slate-800 border border-slate-700 cursor-wait";
+        micIcon.className = "fa-solid fa-circle-notch fa-spin text-lg text-fuchsia-400";
+        micLabel.textContent = "Thinking...";
+      } else if (newState === "speaking") {
+        backdrop.classList.add("orb-backdrop-speaking");
+        dot.className = "w-2.5 h-2.5 rounded-full bg-cyan-400 animate-ping";
+        label.textContent = "Nova is Speaking • Tap Orb to Interrupt";
+        label.className = "text-xs font-semibold tracking-wide text-cyan-300 uppercase";
+
+        micBtn.className = "relative group flex items-center justify-center gap-2.5 px-7 py-4 rounded-full font-display font-bold text-sm sm:text-base text-white bg-gradient-to-r from-indigo-600 via-violet-600 to-indigo-600 hover:from-indigo-500 hover:to-violet-500 shadow-xl shadow-indigo-600/30 transition-all";
+        micIcon.className = "fa-solid fa-hand text-lg";
+        micLabel.textContent = "Interrupt & Speak";
+
+        interruptIcon.className = "fa-solid fa-volume-xmark text-rose-400";
+        interruptLabel.textContent = "Stop Voice";
+      } else {
+        backdrop.classList.add("orb-backdrop-idle");
+        dot.className = "w-2 h-2 rounded-full bg-indigo-400";
+        label.textContent = "Nova • Ready to Talk";
+        label.className = "text-xs font-semibold tracking-wide text-indigo-200 uppercase";
+
+        micBtn.className = "relative group flex items-center justify-center gap-2.5 px-7 py-4 rounded-full font-display font-bold text-sm sm:text-base text-white bg-gradient-to-r from-indigo-600 via-violet-600 to-indigo-600 hover:from-indigo-500 hover:to-violet-500 shadow-xl shadow-indigo-600/30 transition-all transform active:scale-95";
+        micIcon.className = "fa-solid fa-microphone text-lg";
+        micLabel.textContent = "Tap to Speak";
+
+        interruptIcon.className = "fa-solid fa-rotate-left";
+        interruptLabel.textContent = "Replay Voice";
+      }
+    }
+
+    function animateNovaOrb() {
+      const rect = orbCanvas.parentElement.getBoundingClientRect();
+      const width = rect.width;
+      const height = rect.height;
+      const cx = width / 2;
+      const cy = height / 2;
+      const baseRadius = Math.min(width, height) * 0.31;
+
+      orbCtx.clearRect(0, 0, width, height);
+
+      // Speed & amplitude based on state
+      let speed = 0.03;
+      let waveAmp = 4;
+      let colorPrimary = "rgba(99, 102, 241, 0.85)";
+      let colorSecondary = "rgba(56, 189, 248, 0.55)";
+      let coreGradStart = "#818cf8";
+      let coreGradEnd = "#312e81";
+
+      if (state.orbState === "listening") {
+        speed = 0.08;
+        waveAmp = 12;
+        colorPrimary = "rgba(16, 185, 129, 0.85)";
+        colorSecondary = "rgba(6, 182, 212, 0.65)";
+        coreGradStart = "#34d399";
+        coreGradEnd = "#065f46";
+      } else if (state.orbState === "thinking") {
+        speed = 0.11;
+        waveAmp = 9;
+        colorPrimary = "rgba(217, 70, 239, 0.85)";
+        colorSecondary = "rgba(139, 92, 246, 0.65)";
+        coreGradStart = "#e879f9";
+        coreGradEnd = "#4c1d95";
+      } else if (state.orbState === "speaking") {
+        speed = 0.095;
+        waveAmp = 16;
+        colorPrimary = "rgba(56, 189, 248, 0.9)";
+        colorSecondary = "rgba(129, 140, 248, 0.7)";
+        coreGradStart = "#38bdf8";
+        coreGradEnd = "#3730a3";
+      }
+
+      orbPhase += speed;
+
+      // Draw 3 harmonic organic wave layers
+      for (let layer = 0; layer < 3; layer++) {
+        orbCtx.beginPath();
+        const layerOffset = layer * 1.3;
+        const radiusScale = 1 + layer * 0.11;
+
+        for (let angle = 0; angle <= Math.PI * 2; angle += 0.06) {
+          const harmonic =
+            Math.sin(angle * 4 + orbPhase + layerOffset) * waveAmp * 0.6 +
+            Math.cos(angle * 3 - orbPhase * 1.2 + layer) * waveAmp * 0.4;
+          const r = baseRadius * radiusScale + harmonic;
+          const x = cx + Math.cos(angle) * r;
+          const y = cy + Math.sin(angle) * r;
+          if (angle === 0) orbCtx.moveTo(x, y);
+          else orbCtx.lineTo(x, y);
+        }
+        orbCtx.closePath();
+        orbCtx.strokeStyle = layer % 2 === 0 ? colorPrimary : colorSecondary;
+        orbCtx.lineWidth = 2.2 - layer * 0.4;
+        orbCtx.stroke();
+
+        orbCtx.fillStyle = layer === 0 ? colorPrimary.replace("0.85", "0.14") : "transparent";
+        orbCtx.fill();
+      }
+
+      // Draw Glowing Inner Core Sphere
+      const coreGrad = orbCtx.createRadialGradient(
+        cx - baseRadius * 0.25,
+        cy - baseRadius * 0.25,
+        baseRadius * 0.1,
+        cx,
+        cy,
+        baseRadius * 0.95
+      );
+      coreGrad.addColorStop(0, coreGradStart);
+      coreGrad.addColorStop(0.65, colorPrimary);
+      coreGrad.addColorStop(1, coreGradEnd);
+
+      orbCtx.beginPath();
+      const pulseCore = baseRadius * (0.88 + Math.sin(orbPhase * 1.4) * 0.04);
+      orbCtx.arc(cx, cy, pulseCore, 0, Math.PI * 2);
+      orbCtx.fillStyle = coreGrad;
+      orbCtx.fill();
+
+      requestAnimationFrame(animateNovaOrb);
+    }
+
+    /********************************************************************
+     * 3. SPEECH SYNTHESIS (BROWSER NEURAL + GEMINI 2.5 TTS SUPPORT)
+     ********************************************************************/
+    let availableVoices = [];
+    let currentAudioElement = null;
+
+    function populateVoiceList() {
+      if (!("speechSynthesis" in window)) return;
+      availableVoices = window.speechSynthesis.getVoices();
+      const englishVoices = availableVoices.filter(v => v.lang && v.lang.toLowerCase().startsWith("en"));
+      const voicesToShow = englishVoices.length > 0 ? englishVoices : availableVoices;
+
+      const selectEl = document.getElementById("selectVoiceList");
+      if (voicesToShow.length === 0) return;
+
+      selectEl.innerHTML = "";
+
+      // Prioritize natural female/assistant voices like Google US English, Samantha, Aria, Sonia, Natasha
+      let preferredVoice = voicesToShow.find(v =>
+        /Google US English|Microsoft Aria|Microsoft Jenny|Samantha|Victoria|Karen|Sonia|Natural/i.test(v.name)
+      ) || voicesToShow[0];
+
+      if (!state.selectedVoiceURI && preferredVoice) {
+        state.selectedVoiceURI = preferredVoice.voiceURI;
+      }
+
+      voicesToShow.forEach(voice => {
+        const opt = document.createElement("option");
+        opt.value = voice.voiceURI;
+        opt.textContent = `${voice.name} (${voice.lang})`;
+        if (voice.voiceURI === state.selectedVoiceURI) opt.selected = true;
+        selectEl.appendChild(opt);
+      });
+    }
+
+    if ("speechSynthesis" in window) {
+      populateVoiceList();
+      window.speechSynthesis.onvoiceschanged = populateVoiceList;
+    }
+
+    function stopAllSpeech() {
+      if ("speechSynthesis" in window) {
+        window.speechSynthesis.cancel();
+      }
+      if (currentAudioElement) {
+        currentAudioElement.pause();
+        currentAudioElement = null;
+      }
+      state.isSpeaking = false;
+      if (!state.isRecording && !state.isProcessingLLM) {
+        setOrbVisualState("idle");
+      }
+    }
+
+    // Helper for Gemini TTS PCM16 to WAV
+    function base64ToArrayBuffer(base64) {
+      const binaryString = window.atob(base64);
+      const len = binaryString.length;
+      const bytes = new Uint8Array(len);
+      for (let i = 0; i < len; i++) {
+        bytes[i] = binaryString.charCodeAt(i);
+      }
+      return bytes.buffer;
+    }
+
+    function pcmToWav(pcm16, sampleRate = 24000) {
+      const buffer = new ArrayBuffer(44 + pcm16.length * 2);
+      const view = new DataView(buffer);
+      const writeString = (offset, str) => {
+        for (let i = 0; i < str.length; i++) view.setUint8(offset + i, str.charCodeAt(i));
+      };
+      writeString(0, "RIFF");
+      view.setUint32(4, 36 + pcm16.length * 2, true);
+      writeString(8, "WAVE");
+      writeString(12, "fmt ");
+      view.setUint32(16, 16, true);
+      view.setUint16(20, 1, true);
+      view.setUint16(22, 1, true);
+      view.setUint32(24, sampleRate, true);
+      view.setUint32(28, sampleRate * 2, true);
+      view.setUint16(32, 2, true);
+      view.setUint16(34, 16, true);
+      writeString(36, "data");
+      view.setUint32(40, pcm16.length * 2, true);
+      for (let i = 0; i < pcm16.length; i++) {
+        view.setInt16(44 + i * 2, pcm16[i], true);
+      }
+      return new Blob([buffer], { type: "audio/wav" });
+    }
+
+    async function speakWithGeminiTTS(text, onFinishedCallback) {
+      try {
+        setOrbVisualState("speaking");
+        state.isSpeaking = true;
+
+        const payload = {
+          contents: [{ parts: [{ text: `Say in a warm, natural, friendly conversational tone: ${text}` }] }],
+          generationConfig: {
+            responseModalities: ["AUDIO"],
+            speechConfig: {
+              voiceConfig: {
+                prebuiltVoiceConfig: { voiceName: "Aoede" }
+              }
+            }
+          }
+        };
+
+        const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-tts:generateContent?key=${apiKey}`;
+        const res = await fetch(url, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload)
+        });
+        const data = await res.json();
+        const part = data?.candidates?.[0]?.content?.parts?.[0];
+        const audioBase64 = part?.inlineData?.data;
+        const mimeType = part?.inlineData?.mimeType || "audio/L16;rate=24000";
+
+        if (audioBase64) {
+          const rateMatch = mimeType.match(/rate=(\d+)/);
+          const sampleRate = rateMatch ? parseInt(rateMatch[1], 10) : 24000;
+          const pcmBuffer = base64ToArrayBuffer(audioBase64);
+          const pcm16 = new Int16Array(pcmBuffer);
+          const wavBlob = pcmToWav(pcm16, sampleRate);
+          const audioUrl = URL.createObjectURL(wavBlob);
+
+          currentAudioElement = new Audio(audioUrl);
+          currentAudioElement.playbackRate = state.speechRate;
+          currentAudioElement.onended = () => {
+            state.isSpeaking = false;
+            setOrbVisualState("idle");
+            if (onFinishedCallback) onFinishedCallback();
+          };
+          currentAudioElement.onerror = () => {
+            state.isSpeaking = false;
+            setOrbVisualState("idle");
+            if (onFinishedCallback) onFinishedCallback();
+          };
+          await currentAudioElement.play();
+          return;
+        }
+      } catch (e) {
+        // Fallback to browser TTS if Gemini TTS fails
+      }
+      speakWithBrowserTTS(text, onFinishedCallback);
+    }
+
+    function speakWithBrowserTTS(text, onFinishedCallback) {
+      if (!("speechSynthesis" in window)) {
+        if (onFinishedCallback) onFinishedCallback();
+        return;
+      }
+
+      window.speechSynthesis.cancel();
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.rate = state.speechRate;
+      utterance.pitch = 1.03;
+
+      if (availableVoices.length === 0) {
+        availableVoices = window.speechSynthesis.getVoices();
+      }
+      const chosenVoice = availableVoices.find(v => v.voiceURI === state.selectedVoiceURI);
+      if (chosenVoice) utterance.voice = chosenVoice;
+
+      utterance.onstart = () => {
+        state.isSpeaking = true;
+        setOrbVisualState("speaking");
+      };
+
+      utterance.onend = () => {
+        state.isSpeaking = false;
+        setOrbVisualState("idle");
+        if (onFinishedCallback) onFinishedCallback();
+      };
+
+      utterance.onerror = () => {
+        state.isSpeaking = false;
+        setOrbVisualState("idle");
+        if (onFinishedCallback) onFinishedCallback();
+      };
+
+      window.speechSynthesis.speak(utterance);
+    }
+
+    function speakNovaText(text, autoListenAfter = true) {
+      if (!state.autoSpeak) {
+        setOrbVisualState("idle");
+        return;
+      }
+
+      const afterSpeech = () => {
+        if (autoListenAfter && state.handsFreeMode && !state.isRecording && !state.isProcessingLLM) {
+          setTimeout(() => {
+            if (!state.isSpeaking && !state.isProcessingLLM) {
+              startListening();
+            }
+          }, 350);
+        }
+      };
+
+      if (state.ttsEngine === "gemini") {
+        speakWithGeminiTTS(text, afterSpeech);
+      } else {
+        speakWithBrowserTTS(text, afterSpeech);
+      }
+    }
+
+    /********************************************************************
+     * 4. WEB SPEECH API (SPEECH-TO-TEXT RECOGNITION)
+     ********************************************************************/
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    let recognition = null;
+    let accumulatedTranscript = "";
+
+    if (SpeechRecognition) {
+      recognition = new SpeechRecognition();
+      recognition.continuous = true;
+      recognition.interimResults = true;
+      recognition.lang = "en-US";
+
+      recognition.onstart = () => {
+        state.isRecording = true;
+        setOrbVisualState("listening");
+        const box = document.getElementById("interimTranscriptText");
+        box.textContent = "Listening... speak now";
+        box.classList.remove("hidden");
+      };
+
+      recognition.onresult = (event) => {
+        let interim = "";
+        let finalChunk = "";
+        for (let i = event.resultIndex; i < event.results.length; i++) {
+          const transcriptPiece = event.results[i][0].transcript;
+          if (event.results[i].isFinal) {
+            finalChunk += transcriptPiece + " ";
+          } else {
+            interim += transcriptPiece;
+          }
+        }
+        if (finalChunk) {
+          accumulatedTranscript += finalChunk;
+        }
+        const combinedPreview = (accumulatedTranscript + " " + interim).trim();
+        const box = document.getElementById("interimTranscriptText");
+        if (combinedPreview) {
+          box.textContent = `"${combinedPreview}"`;
+          box.classList.remove("hidden");
+        }
+      };
+
+      recognition.onerror = (event) => {
+        if (event.error === "not-allowed") {
+          showToast("Microphone permission denied. You can also type below!");
+        }
+        state.isRecording = false;
+        if (!state.isProcessingLLM && !state.isSpeaking) {
+          setOrbVisualState("idle");
+        }
+      };
+
+      recognition.onend = () => {
+        const wasRecording = state.isRecording;
+        state.isRecording = false;
+        const box = document.getElementById("interimTranscriptText");
+        box.classList.add("hidden");
+
+        const finalSpoken = accumulatedTranscript.trim();
+        accumulatedTranscript = "";
+
+        if (wasRecording && finalSpoken.length > 0) {
+          handleUserTurn(finalSpoken);
+        } else if (!state.isProcessingLLM && !state.isSpeaking) {
+          setOrbVisualState("idle");
+        }
+      };
+    }
+
+    function startListening() {
+      if (state.isProcessingLLM) return;
+      stopAllSpeech();
+
+      if (!recognition) {
+        showToast("Voice recognition isn't supported in this browser. Use the text box below!");
+        document.getElementById("textFallbackInput").focus();
+        return;
+      }
+
+      try {
+        accumulatedTranscript = "";
+        recognition.start();
+      } catch (e) {
+        // Already started
+      }
+    }
+
+    function stopListeningAndSend() {
+      if (!recognition || !state.isRecording) return;
+      try {
+        recognition.stop();
+      } catch (e) {}
+    }
+
+    /********************************************************************
+     * 5. DUAL-CHANNEL GEMINI AI BRAIN (CONVERSATION + GRAMMAR COACH)
+     ********************************************************************/
+    async function callGeminiWithBackoff(payload, maxRetries = 4) {
+      const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${apiKey}`;
+      let delay = 1000;
+
+      for (let attempt = 0; attempt < maxRetries; attempt++) {
+        try {
+          const response = await fetch(apiUrl, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload)
+          });
+
+          if (!response.ok) {
+            throw new Error(`HTTP status ${response.status}`);
+          }
+
+          return await response.json();
+        } catch (err) {
+          if (attempt === maxRetries - 1) throw err;
+          await new Promise(res => setTimeout(res, delay));
+          delay *= 2;
+        }
+      }
+    }
+
+    function analyzeFillersAndWords(text) {
+      const cleanWords = text.trim().split(/\s+/).filter(Boolean);
+      state.totalWordsSpoken += cleanWords.length;
+
+      const lowerText = text.toLowerCase();
+      let turnFillers = 0;
+
+      FILLER_WORDS_LIST.forEach(filler => {
+        const regex = new RegExp(`\\b${filler}\\b`, "gi");
+        const matches = lowerText.match(regex);
+        if (matches && matches.length > 0) {
+          turnFillers += matches.length;
+          state.fillerBreakdown[filler] = (state.fillerBreakdown[filler] || 0) + matches.length;
+        }
+      });
+
+      state.totalFillersCount += turnFillers;
+      return turnFillers;
+    }
+
+    async function handleUserTurn(userText) {
+      const trimmed = userText.trim();
+      if (!trimmed || state.isProcessingLLM) return;
+
+      stopAllSpeech();
+      state.isProcessingLLM = true;
+      setOrbVisualState("thinking");
+
+      // Update stats
+      state.turnsCount += 1;
+      const fillersInTurn = analyzeFillersAndWords(trimmed);
+      updateHeaderAnalyticsUI();
+
+      // Create initial user message in transcript
+      const userMsgId = "msg_" + Date.now();
+      const userMsgObj = {
+        id: userMsgId,
+        sender: "user",
+        text: trimmed,
+        timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+        fillersInTurn,
+        coaching: null // populated when Gemini responds
+      };
+      state.messages.push(userMsgObj);
+      renderTranscriptFeed();
+
+      // Build System Prompt based on active mode
+      const activeModeInfo = SCENARIO_MODES[state.currentMode] || SCENARIO_MODES.free_talk;
+      const scenarioDescription = state.currentMode === "custom" && state.customTopicText
+        ? `Custom Topic requested by user: "${state.customTopicText}"`
+        : activeModeInfo.systemContext;
+
+      const systemInstructionText = `You are Nova, a warm, encouraging, realistic Spoken English Communication Partner and Fluency Coach (inspired by SuperNova AI).
+Current Practice Scenario: ${scenarioDescription}
+
+YOUR RULES:
+1. Respond in ` + "`spokenReply`" + ` like a real human friend or coach on a live phone call: keep it concise (2 to 3 sentences maximum), natural, engaging, and ALWAYS end with an open-ended follow-up question to keep the user talking. Do NOT use markdown or bullet points inside ` + "`spokenReply`" + `.
+2. Evaluate the user's message for grammar accuracy, natural native English phrasing, and fluency:
+   - Set ` + "`hasMistake`" + ` to true if the user made a grammatical error, used awkward phrasing, or if there is a noticeably smoother way a native speaker would say it.
+   - Provide ` + "`correctedText`" + `: a polished, natural native-sounding version of the user's exact thought.
+   - Provide ` + "`explanation`" + `: a friendly, encouraging 1-sentence coaching tip explaining the grammar fix or phrasing improvement.
+   - Provide ` + "`vocabUpgrade`" + `: 1 or 2 relevant higher-level English words, phrasal verbs, or idioms the user can use for this topic.
+   - Provide ` + "`fluencyScore`" + `: an integer from 1 to 100 rating the clarity, grammar, and naturalness of the user's turn.
+   - Provide ` + "`suggestedReplyHint`" + `: a natural 1-sentence example answer the user could say next in response to your new question.`;
+
+      state.geminiChatHistory.push({
+        role: "user",
+        parts: [{ text: trimmed }]
+      });
+
+      const payload = {
+        contents: state.geminiChatHistory,
+        systemInstruction: {
+          parts: [{ text: systemInstructionText }]
+        },
+        generationConfig: {
+          responseMimeType: "application/json",
+          responseSchema: {
+            type: "OBJECT",
+            properties: {
+              spokenReply: { type: "STRING" },
+              hasMistake: { type: "BOOLEAN" },
+              originalText: { type: "STRING" },
+              correctedText: { type: "STRING" },
+              explanation: { type: "STRING" },
+              vocabUpgrade: {
+                type: "ARRAY",
+                items: {
+                  type: "OBJECT",
+                  properties: {
+                    wordOrIdiom: { type: "STRING" },
+                    meaning: { type: "STRING" }
+                  },
+                  required: ["wordOrIdiom", "meaning"]
+                }
+              },
+              fluencyScore: { type: "INTEGER" },
+              suggestedReplyHint: { type: "STRING" }
+            },
+            required: [
+              "spokenReply",
+              "hasMistake",
+              "originalText",
+              "correctedText",
+              "explanation",
+              "vocabUpgrade",
+              "fluencyScore",
+              "suggestedReplyHint"
+            ]
+          }
+        }
+      };
+
+      try {
+        const result = await callGeminiWithBackoff(payload);
+        const rawJsonText = result?.candidates?.[0]?.content?.parts?.[0]?.text;
+        const parsed = JSON.parse(rawJsonText);
+
+        // Save model response in history
+        state.geminiChatHistory.push({
+          role: "model",
+          parts: [{ text: parsed.spokenReply }]
+        });
+
+        // Attach coaching feedback to user message
+        userMsgObj.coaching = {
+          hasMistake: parsed.hasMistake,
+          originalText: parsed.originalText || trimmed,
+          correctedText: parsed.correctedText,
+          explanation: parsed.explanation,
+          vocabUpgrade: parsed.vocabUpgrade || [],
+          fluencyScore: parsed.fluencyScore || 85
+        };
+
+        state.fluencyScores.push(userMsgObj.coaching.fluencyScore);
+
+        if (parsed.hasMistake || (parsed.vocabUpgrade && parsed.vocabUpgrade.length > 0)) {
+          state.corrections.unshift({
+            id: "corr_" + Date.now(),
+            ...userMsgObj.coaching,
+            timestamp: userMsgObj.timestamp
+          });
+        }
+
+        // Add Nova's reply message
+        const novaReplyText = parsed.spokenReply || "That's really interesting! Could you tell me a bit more about that?";
+        state.lastNovaReply = novaReplyText;
+        state.currentHint = parsed.suggestedReplyHint || "I'd love to share more details about my experience with that.";
+
+        state.messages.push({
+          id: "msg_nova_" + Date.now(),
+          sender: "nova",
+          text: novaReplyText,
+          timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
+        });
+
+        // Update UI
+        document.getElementById("novaLiveSubtitle").textContent = `"${novaReplyText}"`;
+        document.getElementById("hintText").textContent = `"${state.currentHint}"`;
+        updateHeaderAnalyticsUI();
+        renderTranscriptFeed();
+        renderCorrectionsFeed();
+
+        state.isProcessingLLM = false;
+        speakNovaText(novaReplyText, true);
+
+      } catch (error) {
+        state.isProcessingLLM = false;
+        const fallbackReply = "I heard you! Let's keep going—could you elaborate a little more on what you mean?";
+        state.lastNovaReply = fallbackReply;
+        state.messages.push({
+          id: "msg_nova_" + Date.now(),
+          sender: "nova",
+          text: fallbackReply,
+          timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
+        });
+        document.getElementById("novaLiveSubtitle").textContent = `"${fallbackReply}"`;
+        renderTranscriptFeed();
+        speakNovaText(fallbackReply, true);
+      }
+    }
+
+    /********************************************************************
+     * 6. UI RENDERING (TRANSCRIPT, INLINE COACH CARDS, SAVED DECK)
+     ********************************************************************/
+    function escapeHtml(str) {
+      if (!str) return "";
+      return String(str)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;");
+    }
+
+    function updateHeaderAnalyticsUI() {
+      document.getElementById("statTurns").textContent = state.turnsCount;
+      document.getElementById("statFillers").textContent = state.totalFillersCount;
+
+      if (state.fluencyScores.length > 0) {
+        const avg = Math.round(
+          state.fluencyScores.reduce((a, b) => a + b, 0) / state.fluencyScores.length
+        );
+        const fluencyEl = document.getElementById("statFluency");
+        fluencyEl.textContent = `${avg}%`;
+        fluencyEl.className = avg >= 80
+          ? "font-semibold text-emerald-400"
+          : avg >= 65
+          ? "font-semibold text-amber-400"
+          : "font-semibold text-rose-400";
+      } else {
+        document.getElementById("statFluency").textContent = "--%";
+      }
+
+      document.getElementById("badgeCorrectionsCount").textContent = state.corrections.length;
+      document.getElementById("badgeSavedCount").textContent = state.savedDeck.length;
+    }
+
+    function renderTranscriptFeed() {
+      const container = document.getElementById("tabPanelTranscript");
+      container.innerHTML = "";
+
+      state.messages.forEach(msg => {
+        if (msg.sender === "nova") {
+          const novaEl = document.createElement("div");
+          novaEl.className = "flex items-start gap-2.5";
+          novaEl.innerHTML = `
+            <div class="w-8 h-8 rounded-xl bg-gradient-to-tr from-indigo-600 to-cyan-400 flex items-center justify-center text-white shrink-0 shadow-md mt-0.5">
+              <i class="fa-solid fa-sparkles text-xs"></i>
+            </div>
+            <div class="flex-1 bg-slate-900/85 border border-slate-800 rounded-2xl rounded-tl-sm p-3.5 shadow">
+              <div class="flex items-center justify-between gap-2 mb-1">
+                <span class="text-[11px] font-bold text-indigo-300 uppercase tracking-wider">Nova • AI Coach</span>
+                <div class="flex items-center gap-2">
+                  <button onclick="speakTextSnippet('${escapeHtml(msg.text).replace(/'/g, "\\'")}')" class="text-slate-400 hover:text-cyan-300 text-xs transition" title="Listen again">
+                    <i class="fa-solid fa-volume-high"></i>
+                  </button>
+                  <span class="text-[10px] text-slate-500">${msg.timestamp}</span>
+                </div>
+              </div>
+              <p class="text-xs sm:text-sm text-slate-100 leading-relaxed">${escapeHtml(msg.text)}</p>
+            </div>
+          `;
+          container.appendChild(novaEl);
+        } else {
+          const userWrapper = document.createElement("div");
+          userWrapper.className = "flex flex-col items-end space-y-2";
+
+          const scoreBadge = msg.coaching
+            ? `<span class="px-2 py-0.5 rounded-full text-[10px] font-bold ${
+                msg.coaching.fluencyScore >= 80
+                  ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/30"
+                  : "bg-amber-500/20 text-amber-300 border border-amber-500/30"
+              }">Fluency ${msg.coaching.fluencyScore}%</span>`
+            : `<span class="text-[10px] text-fuchsia-300 animate-pulse"><i class="fa-solid fa-circle-notch fa-spin mr-1"></i>Analyzing English...</span>`;
+
+          let coachingCardHtml = "";
+          if (msg.coaching) {
+            const c = msg.coaching;
+            const vocabHtml = (c.vocabUpgrade || [])
+              .map(
+                v => `
+                <div class="flex items-center justify-between gap-2 bg-slate-900/90 border border-slate-800/90 rounded-xl px-2.5 py-1.5 mt-1.5">
+                  <div class="text-[11px]">
+                    <span class="font-bold text-cyan-300">${escapeHtml(v.wordOrIdiom)}</span>
+                    <span class="text-slate-400"> — ${escapeHtml(v.meaning)}</span>
+                  </div>
+                  <button onclick="saveToDeck('Vocab Upgrade', '${escapeHtml(v.wordOrIdiom).replace(/'/g, "\\'")}', '${escapeHtml(v.meaning).replace(/'/g, "\\'")}')" class="text-amber-400 hover:text-amber-300 text-xs px-1.5" title="Save to Phrase Deck">
+                    <i class="fa-regular fa-bookmark"></i>
+                  </button>
+                </div>`
+              )
+              .join("");
+
+            coachingCardHtml = `
+              <div class="w-full sm:w-[94%] bg-slate-900/95 border ${
+                c.hasMistake ? "border-emerald-500/35" : "border-indigo-500/30"
+              } rounded-2xl p-3 text-xs space-y-2 shadow-lg">
+                <div class="flex items-center justify-between">
+                  <span class="font-bold uppercase tracking-wider text-[10px] ${
+                    c.hasMistake ? "text-emerald-400" : "text-indigo-300"
+                  } flex items-center gap-1.5">
+                    <i class="fa-solid ${c.hasMistake ? "fa-wand-magic-sparkles" : "fa-circle-check"}"></i>
+                    ${c.hasMistake ? "Better Native Phrasing" : "Great Natural Expression!"}
+                  </span>
+                  <div class="flex items-center gap-2">
+                    <button onclick="speakTextSnippet('${escapeHtml(c.correctedText).replace(/'/g, "\\'")}')" class="text-slate-400 hover:text-cyan-300 transition" title="Hear native pronunciation">
+                      <i class="fa-solid fa-volume-high"></i>
+                    </button>
+                    <button onclick="saveToDeck('${escapeHtml(c.originalText).replace(/'/g, "\\'")}', '${escapeHtml(c.correctedText).replace(/'/g, "\\'")}', '${escapeHtml(c.explanation).replace(/'/g, "\\'")}')" class="text-amber-400 hover:text-amber-300 transition" title="Save improved phrase to Deck">
+                      <i class="fa-regular fa-bookmark"></i>
+                    </button>
+                  </div>
+                </div>
+
+                <div class="bg-emerald-950/35 border border-emerald-500/25 rounded-xl px-3 py-2 text-emerald-200 font-medium">
+                  "${escapeHtml(c.correctedText)}"
+                </div>
+
+                <p class="text-[11px] text-slate-300 leading-relaxed">
+                  <i class="fa-solid fa-lightbulb text-amber-400 mr-1"></i>${escapeHtml(c.explanation)}
+                </p>
+
+                ${
+                  vocabHtml
+                    ? `<div class="pt-1 border-t border-slate-800/80">
+                        <span class="text-[10px] font-semibold uppercase tracking-wider text-slate-400">Vocabulary Boost:</span>
+                        ${vocabHtml}
+                      </div>`
+                    : ""
+                }
+              </div>
+            `;
+          }
+
+          userWrapper.innerHTML = `
+            <div class="max-w-[90%] bg-indigo-600/25 border border-indigo-500/40 rounded-2xl rounded-tr-sm p-3.5 text-right">
+              <div class="flex items-center justify-end gap-2 mb-1">
+                ${scoreBadge}
+                <span class="text-[11px] font-bold text-indigo-200">You</span>
+                <span class="text-[10px] text-slate-400">${msg.timestamp}</span>
+              </div>
+              <p class="text-xs sm:text-sm text-white leading-relaxed text-left">${escapeHtml(msg.text)}</p>
+            </div>
+            ${coachingCardHtml}
+          `;
+          container.appendChild(userWrapper);
+        }
+      });
+
+      container.scrollTop = container.scrollHeight;
+    }
+
+    function renderCorrectionsFeed() {
+      const emptyEl = document.getElementById("correctionsEmptyState");
+      const listEl = document.getElementById("correctionsListContainer");
+
+      if (state.corrections.length === 0) {
+        emptyEl.classList.remove("hidden");
+        listEl.innerHTML = "";
+        return;
+      }
+
+      emptyEl.classList.add("hidden");
+      listEl.innerHTML = state.corrections
+        .map(
+          item => `
+        <div class="glass-card rounded-2xl p-3.5 space-y-2 border border-slate-700/80">
+          <div class="flex items-center justify-between">
+            <span class="text-[10px] font-bold uppercase tracking-wider text-emerald-400">
+              <i class="fa-solid fa-graduation-cap mr-1"></i>Fluency Score: ${item.fluencyScore}%
+            </span>
+            <div class="flex items-center gap-2">
+              <button onclick="speakTextSnippet('${escapeHtml(item.correctedText).replace(/'/g, "\\'")}')" class="text-xs text-slate-300 hover:text-cyan-300">
+                <i class="fa-solid fa-volume-high"></i>
+              </button>
+              <button onclick="saveToDeck('${escapeHtml(item.originalText).replace(/'/g, "\\'")}', '${escapeHtml(item.correctedText).replace(/'/g, "\\'")}', '${escapeHtml(item.explanation).replace(/'/g, "\\'")}')" class="text-xs text-amber-400 hover:text-amber-300">
+                <i class="fa-regular fa-bookmark"></i> Save
+              </button>
+            </div>
+          </div>
+          <div class="text-xs space-y-1">
+            <p class="text-rose-300/90 line-through"><span class="text-slate-400 no-underline">You said:</span> "${escapeHtml(item.originalText)}"</p>
+            <p class="text-emerald-300 font-semibold"><span class="text-slate-400 font-normal">Better way:</span> "${escapeHtml(item.correctedText)}"</p>
+          </div>
+          <p class="text-[11px] text-slate-300 bg-slate-900/80 rounded-xl p-2 border border-slate-800">
+            <i class="fa-solid fa-circle-info text-indigo-400 mr-1"></i>${escapeHtml(item.explanation)}
+          </p>
+        </div>
+      `
+        )
+        .join("");
+    }
+
+    function renderSavedDeck() {
+      const emptyEl = document.getElementById("savedEmptyState");
+      const listEl = document.getElementById("savedListContainer");
+      document.getElementById("badgeSavedCount").textContent = state.savedDeck.length;
+
+      if (state.savedDeck.length === 0) {
+        emptyEl.classList.remove("hidden");
+        listEl.innerHTML = "";
+        return;
+      }
+
+      emptyEl.classList.add("hidden");
+      listEl.innerHTML = state.savedDeck
+        .map(
+          (card, idx) => `
+        <div class="glass-card rounded-2xl p-3.5 space-y-2 border border-amber-500/25">
+          <div class="flex items-center justify-between">
+            <span class="text-[10px] font-bold uppercase tracking-wider text-amber-300">
+              <i class="fa-solid fa-star mr-1"></i>Saved Expression
+            </span>
+            <div class="flex items-center gap-2.5">
+              <button onclick="speakTextSnippet('${escapeHtml(card.better).replace(/'/g, "\\'")}')" class="text-xs text-cyan-300 hover:text-cyan-200" title="Listen">
+                <i class="fa-solid fa-volume-high"></i>
+              </button>
+              <button onclick="removeSavedCard(${idx})" class="text-xs text-slate-400 hover:text-rose-400" title="Remove">
+                <i class="fa-solid fa-trash-can"></i>
+              </button>
+            </div>
+          </div>
+          <p class="text-xs sm:text-sm font-bold text-white">"${escapeHtml(card.better)}"</p>
+          ${
+            card.original && card.original !== "Vocab Upgrade"
+              ? `<p class="text-[11px] text-slate-400">Instead of: <span class="italic">${escapeHtml(card.original)}</span></p>`
+              : ""
+          }
+          <p class="text-[11px] text-indigo-200 bg-slate-900/80 rounded-xl p-2 border border-slate-800">${escapeHtml(card.tip)}</p>
+        </div>
+      `
+        )
+        .join("");
+    }
+
+    window.speakTextSnippet = function (text) {
+      speakNovaText(text, false);
+    };
+
+    window.saveToDeck = function (original, better, tip) {
+      const exists = state.savedDeck.some(item => item.better === better);
+      if (exists) {
+        showToast("Already in your Saved Phrase Deck!");
+        return;
+      }
+      state.savedDeck.unshift({ original, better, tip, savedAt: Date.now() });
+      try {
+        localStorage.setItem("novaspeak_saved_deck_v1", JSON.stringify(state.savedDeck));
+      } catch (e) {}
+      renderSavedDeck();
+      updateHeaderAnalyticsUI();
+      showToast("Saved to your Phrase Deck!");
+    };
+
+    window.removeSavedCard = function (index) {
+      state.savedDeck.splice(index, 1);
+      try {
+        localStorage.setItem("novaspeak_saved_deck_v1", JSON.stringify(state.savedDeck));
+      } catch (e) {}
+      renderSavedDeck();
+      updateHeaderAnalyticsUI();
+    };
+
+    function showToast(message) {
+      const toast = document.getElementById("toastNotification");
+      document.getElementById("toastText").textContent = message;
+      toast.classList.remove("hidden");
+      setTimeout(() => {
+        toast.classList.add("hidden");
+      }, 2600);
+    }
+
+    /********************************************************************
+     * 7. SCENARIO SWITCHING, REPORT CARD, & EVENT LISTENERS
+     ********************************************************************/
+    function initOrResetScenario(modeKey) {
+      stopAllSpeech();
+      if (state.isRecording) stopListeningAndSend();
+
+      state.currentMode = modeKey;
+      const modeConfig = SCENARIO_MODES[modeKey] || SCENARIO_MODES.free_talk;
+
+      const greeting =
+        modeKey === "custom" && state.customTopicText
+          ? `Awesome! Let's talk about "${state.customTopicText}". How would you like to start, or what's your favorite aspect of this topic?`
+          : modeConfig.starterGreeting;
+
+      state.lastNovaReply = greeting;
+      state.currentHint = modeConfig.starterHint;
+      state.geminiChatHistory = [
+        {
+          role: "model",
+          parts: [{ text: greeting }]
+        }
+      ];
+
+      state.messages = [
+        {
+          id: "msg_init_" + Date.now(),
+          sender: "nova",
+          text: greeting,
+          timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
+        }
+      ];
+
+      document.getElementById("novaLiveSubtitle").textContent = `"${greeting}"`;
+      document.getElementById("hintText").textContent = `"${state.currentHint}"`;
+      renderTranscriptFeed();
+      speakNovaText(greeting, false);
+    }
+
+    // Mode Selector Buttons
+    document.querySelectorAll(".mode-btn").forEach(btn => {
+      btn.addEventListener("click", () => {
+        document.querySelectorAll(".mode-btn").forEach(b => {
+          b.className = "mode-btn shrink-0 px-3.5 py-2 rounded-xl text-xs font-semibold transition flex items-center gap-2 bg-slate-800/80 hover:bg-slate-800 text-slate-300 border border-slate-700/70";
+        });
+        btn.className = "mode-btn active shrink-0 px-3.5 py-2 rounded-xl text-xs font-semibold transition flex items-center gap-2 bg-indigo-600 text-white shadow-md shadow-indigo-600/30 border border-indigo-400/40";
+
+        const selectedMode = btn.getAttribute("data-mode");
+        const customWrapper = document.getElementById("customTopicWrapper");
+        if (selectedMode === "custom") {
+          customWrapper.classList.remove("hidden");
+          document.getElementById("customTopicInput").focus();
+        } else {
+          customWrapper.classList.add("hidden");
+          initOrResetScenario(selectedMode);
+        }
+      });
+    });
+
+    document.getElementById("btnApplyCustomTopic").addEventListener("click", () => {
+      const val = document.getElementById("customTopicInput").value.trim();
+      if (!val) {
+        showToast("Please enter a topic first!");
+        return;
+      }
+      state.customTopicText = val;
+      initOrResetScenario("custom");
+    });
+
+    // Continuous Hands-Free Toggle
+    document.getElementById("toggleHandsFree").addEventListener("change", (e) => {
+      state.handsFreeMode = e.target.checked;
+      showToast(state.handsFreeMode ? "Continuous Call Mode ON" : "Continuous Call Mode OFF (Push-to-Talk)");
+    });
+
+    // Primary Mic Button & Orb Click
+    function handlePrimaryMicAction() {
+      if (state.isSpeaking) {
+        // Interrupt Nova and immediately listen
+        stopAllSpeech();
+        startListening();
+        return;
+      }
+      if (state.isRecording) {
+        stopListeningAndSend();
+      } else {
+        startListening();
+      }
+    }
+
+    document.getElementById("btnMicToggle").addEventListener("click", handlePrimaryMicAction);
+    document.getElementById("orbClickArea").addEventListener("click", handlePrimaryMicAction);
+
+    // Interrupt or Replay Button
+    document.getElementById("btnInterruptOrReplay").addEventListener("click", () => {
+      if (state.isSpeaking) {
+        stopAllSpeech();
+      } else if (state.lastNovaReply) {
+        speakNovaText(state.lastNovaReply, false);
+      }
+    });
+
+    // Hint Banner Controls
+    document.getElementById("btnShowHint").addEventListener("click", () => {
+      const banner = document.getElementById("hintBanner");
+      banner.classList.toggle("hidden");
+    });
+    document.getElementById("btnCloseHint").addEventListener("click", () => {
+      document.getElementById("hintBanner").classList.add("hidden");
+    });
+
+    // Text Input Fallback Form
+    document.getElementById("textFallbackForm").addEventListener("submit", (e) => {
+      e.preventDefault();
+      const input = document.getElementById("textFallbackInput");
+      const text = input.value.trim();
+      if (!text) return;
+      input.value = "";
+      handleUserTurn(text);
+    });
+
+    // Sidebar Tabs
+    document.querySelectorAll(".sidebar-tab").forEach(tabBtn => {
+      tabBtn.addEventListener("click", () => {
+        document.querySelectorAll(".sidebar-tab").forEach(b => {
+          b.className = "sidebar-tab px-3.5 py-2 text-xs font-semibold rounded-t-xl border-b-2 border-transparent text-slate-400 hover:text-slate-200 flex items-center gap-1.5 transition";
+        });
+        tabBtn.className = "sidebar-tab active px-3.5 py-2 text-xs font-semibold rounded-t-xl border-b-2 border-indigo-500 text-white bg-slate-800/60 flex items-center gap-1.5 transition";
+
+        const target = tabBtn.getAttribute("data-tab");
+        document.getElementById("tabPanelTranscript").classList.toggle("hidden", target !== "transcript");
+        document.getElementById("tabPanelCorrections").classList.toggle("hidden", target !== "corrections");
+        document.getElementById("tabPanelSaved").classList.toggle("hidden", target !== "saved");
+      });
+    });
+
+    // Reset Session Button
+    document.getElementById("btnClearSession").addEventListener("click", () => {
+      state.turnsCount = 0;
+      state.fluencyScores = [];
+      state.totalWordsSpoken = 0;
+      state.totalFillersCount = 0;
+      state.fillerBreakdown = {};
+      state.corrections = [];
+      updateHeaderAnalyticsUI();
+      renderCorrectionsFeed();
+      initOrResetScenario(state.currentMode);
+      showToast("Conversation reset!");
+    });
+
+    // Settings Modal Controls
+    document.getElementById("btnOpenSettings").addEventListener("click", () => {
+      document.getElementById("modalSettings").classList.remove("hidden");
+    });
+    document.getElementById("btnCloseSettings").addEventListener("click", () => {
+      document.getElementById("modalSettings").classList.add("hidden");
+    });
+    document.getElementById("btnSaveSettings").addEventListener("click", () => {
+      document.getElementById("modalSettings").classList.add("hidden");
+      showToast("Voice settings updated!");
+    });
+
+    document.getElementById("selectTtsEngine").addEventListener("change", (e) => {
+      state.ttsEngine = e.target.value;
+      document.getElementById("browserVoicePickerRow").classList.toggle("hidden", state.ttsEngine === "gemini");
+    });
+
+    document.getElementById("selectVoiceList").addEventListener("change", (e) => {
+      state.selectedVoiceURI = e.target.value;
+    });
+
+    document.getElementById("rangeSpeechRate").addEventListener("input", (e) => {
+      state.speechRate = parseFloat(e.target.value);
+      document.getElementById("speedValueLabel").textContent = `${state.speechRate.toFixed(2)}x`;
+    });
+
+    document.getElementById("checkAutoSpeak").addEventListener("change", (e) => {
+      state.autoSpeak = e.target.checked;
+    });
+
+    document.getElementById("btnTestVoice").addEventListener("click", () => {
+      speakNovaText("Hi! I'm Nova, your personal English speaking coach. Let's practice together!", false);
+    });
+
+    // Report Card Modal Logic
+    function populateAndShowReportCard() {
+      stopAllSpeech();
+      document.getElementById("reportTurnsCount").textContent = state.turnsCount;
+      document.getElementById("reportWordsCount").textContent = state.totalWordsSpoken;
+      document.getElementById("reportFillersCount").textContent = state.totalFillersCount;
+
+      const avg = state.fluencyScores.length > 0
+        ? Math.round(state.fluencyScores.reduce((a, b) => a + b, 0) / state.fluencyScores.length)
+        : 0;
+      document.getElementById("reportAvgFluency").textContent = state.fluencyScores.length > 0 ? `${avg}%` : "--%";
+
+      const fillerSummaryEl = document.getElementById("reportFillerSummary");
+      if (state.turnsCount === 0) {
+        fillerSummaryEl.textContent = "Complete a few speaking turns with Nova to unlock your filler word & pacing insights.";
+      } else if (state.totalFillersCount === 0) {
+        fillerSummaryEl.innerHTML = `<span class="text-emerald-400 font-semibold">Spotless delivery!</span> You spoke ${state.totalWordsSpoken} words across ${state.turnsCount} turns without relying on filler words like "um", "uh", or "basically".`;
+      } else {
+        const pairs = Object.entries(state.fillerBreakdown)
+          .map(([word, count]) => `"${word}" (${count}x)`)
+          .join(", ");
+        fillerSummaryEl.innerHTML = `We detected <span class="text-rose-300 font-semibold">${state.totalFillersCount} filler word(s)</span> during your session: <span class="text-white font-mono">${pairs}</span>. Tip: Try pausing silently for half a second instead of using filler words to sound more executive and confident.`;
+      }
+
+      const corrListEl = document.getElementById("reportCorrectionsList");
+      if (state.corrections.length === 0) {
+        corrListEl.innerHTML = `<p class="text-xs text-slate-400 italic">No grammar corrections recorded in this session yet. Keep talking with Nova!</p>`;
+      } else {
+        corrListEl.innerHTML = state.corrections
+          .map(
+            c => `
+          <div class="bg-slate-900/90 border border-slate-800 rounded-xl p-3 text-xs space-y-1">
+            <p class="text-rose-300 line-through">"${escapeHtml(c.originalText)}"</p>
+            <p class="text-emerald-300 font-semibold"><i class="fa-solid fa-arrow-right mr-1"></i>"${escapeHtml(c.correctedText)}"</p>
+            <p class="text-[11px] text-slate-400">${escapeHtml(c.explanation)}</p>
+          </div>
+        `
+          )
+          .join("");
+      }
+
+      document.getElementById("modalReportCard").classList.remove("hidden");
+    }
+
+    document.getElementById("btnOpenReport").addEventListener("click", populateAndShowReportCard);
+    document.getElementById("btnCloseReport").addEventListener("click", () => {
+      document.getElementById("modalReportCard").classList.add("hidden");
+    });
+    document.getElementById("btnContinueCall").addEventListener("click", () => {
+      document.getElementById("modalReportCard").classList.add("hidden");
+    });
+
+    // Copy Report Summary to Clipboard
+    document.getElementById("btnCopyReport").addEventListener("click", () => {
+      const avg = state.fluencyScores.length > 0
+        ? Math.round(state.fluencyScores.reduce((a, b) => a + b, 0) / state.fluencyScores.length)
+        : 0;
+      const lines = [
+        "=== NovaSpeak AI Spoken English Report Card ===",
+        `Practice Mode: ${SCENARIO_MODES[state.currentMode]?.name || "Free Talk"}`,
+        `Speaking Turns: ${state.turnsCount} | Words Spoken: ${state.totalWordsSpoken}`,
+        `Average Fluency Score: ${avg}% | Filler Words: ${state.totalFillersCount}`,
+        "",
+        "Top Phrasing Upgrades:"
+      ];
+      state.corrections.forEach((c, idx) => {
+        lines.push(`${idx + 1}. Instead of: "${c.originalText}" -> Say: "${c.correctedText}" (${c.explanation})`);
+      });
+
+      const tempInput = document.createElement("textarea");
+      tempInput.value = lines.join("\n");
+      document.body.appendChild(tempInput);
+      tempInput.select();
+      document.execCommand("copy");
+      document.body.removeChild(tempInput);
+
+      showToast("Session Report copied to clipboard!");
+    });
+
+    // Live Call Timer
+    setInterval(() => {
+      const elapsedSec = Math.floor((Date.now() - state.sessionStartTime) / 1000);
+      const mins = String(Math.floor(elapsedSec / 60)).padStart(2, "0");
+      const secs = String(elapsedSec % 60)).padStart(2, "0");
+      document.getElementById("statTimer").textContent = `${mins}:${secs}`;
+    }, 1000);
+
+    // Initialize Application on Load
+    window.onload = function () {
+      resizeOrbCanvas();
+      animateNovaOrb();
+      renderSavedDeck();
+
+      // Seed initial greeting message in transcript
+      state.messages.push({
+        id: "msg_welcome",
+        sender: "nova",
+        text: SCENARIO_MODES.free_talk.starterGreeting,
+        timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
+      });
+      state.geminiChatHistory.push({
+        role: "model",
+        parts: [{ text: SCENARIO_MODES.free_talk.starterGreeting }]
+      });
+      renderTranscriptFeed();
+    };
+  </script>
+</body>
+</html>
+```

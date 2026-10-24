@@ -1,0 +1,10 @@
+{
+  "name": "NovaSpeak AI",
+  "description": "Real-time Spoken English communication partner and fluency coach with animated voice orb, instant grammar corrections, vocabulary upgrades, filler word tracking, and custom roleplay scenarios.",
+  "requestFramePermissions": [
+    "microphone"
+  ],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
